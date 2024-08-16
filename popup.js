@@ -46,7 +46,7 @@ async function generateTitle(prompt) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer $KEY`,
+            'Authorization': `Bearer`,
         },
         body: JSON.stringify({
             model:'davinci-002',
