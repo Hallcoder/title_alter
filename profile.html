@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <button id="back-button" class="btn-back">← Back</button>
+        <!-- Profile Header with Image and Title -->
+        <div class="profile-header">
+            <img src="profile-icon.png" alt="Profile Picture" class="profile-pic">
+            <h1>Your Profile</h1>
+        </div>
+
+        <!-- Subscription Plan Section -->
+        <div class="section">
+            <h2>Subscription Plan</h2>
+            <p>Current Plan: <span class="highlight">Premium</span></p>
+            <p>Next Billing Date: <span class="highlight">August 20, 2024</span></p>
+            <button class="btn-primary">Manage Subscription</button>
+        </div>
+
+        <!-- Profile Information Section -->
+        <div class="section">
+            <h2>Profile Information</h2>
+            <p><strong>Email:</strong> user@example.com</p>
+            <p><strong>Username:</strong> yourusername</p>
+            <button class="btn-secondary">Edit Profile</button>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="section">
+            <h2>Change Password</h2>
+            <button id="change-password-button" class="btn-secondary">Change Password</button>
+        </div>
+
+        <!-- Help Section -->
+        <div class="section">
+            <h2>Help</h2>
+            <p>Need assistance? Visit our <a href="#">Help Center</a> or <a href="#">Contact Support</a>.</p>
+        </div>
+    </div>
+
+    <script src="profile.js"></script> <!-- Link to external JS file -->
+</body>
+</html>

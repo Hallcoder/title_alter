@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Title Changer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Profile Icon -->
+        <div class="profile-icon">
+            <a href="profile.html">
+                <img src="profile-icon.png" alt="Profile">
+            </a>
+        </div>
+
+        <h1>YouTube Title Changer</h1>
+        
+        <label for="customTitle">New Title:</label>
+        <input type="text" id="customTitle" placeholder="Enter title here..." />
+        <button id="changeTitle">Change Title</button>
+        <button id="generateAIButton" class="btn-ai">Generate Using AI</button>
+        <div class="divider"></div>
+
+        <div class="auto-set-section">
+            <label>
+                <input type="checkbox" id="autoSet">
+                Auto-set on reload
+            </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="pricing-section">
+            <h2>Go Premium</h2>
+            <p>Upgrade for just $0.99/month and enjoy:</p>
+            <ul>
+                <li>✨Creative titles with AI</li>
+                <li>🔄Auto Title Generation</li>
+                <li>📂Custom Categories selection</li>
+            </ul>
+            <button id="upgradeButton">Learn More</button>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

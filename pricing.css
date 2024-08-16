@@ -1,0 +1,122 @@
+/* Base styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Pricing Table */
+.pricing-table {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    max-width: 1000px;
+}
+
+/* Plan Card */
+.plan {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Plan Title and Price */
+.plan h2 {
+    margin-top: 0;
+    color: #333;
+    position: relative;
+    font-size: 24px; /* Increased font size for titles */
+}
+
+.price {
+    font-size: 40px;
+    color: #333;
+}
+
+.price span {
+    font-size: 18px;
+    color: #777;
+}
+
+.plan p {
+    color: #666;
+    font-size: 18px; /* Slightly increased font size for better readability */
+    margin: 20px 0;
+}
+
+/* Features List */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 20px;
+}
+
+ul li {
+    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px; /* Increased font size for features */
+}
+
+ul li:first-child {
+    border-top: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    display: inline-block;
+    background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj4KICA8cGF0aCBkPSJNMTAsNkwxMCw1MEwxOCw4MEwyMiwxMCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1jb2xvcj0iIzAwNzc3NyIvPjwvcGF0aD4KPC9zdmc+');
+    background-size: contain; /* Ensures the SVG scales correctly */
+    background-repeat: no-repeat;
+}
+
+/* Button */
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #6200ea;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #3700b3;
+}
+
+/* Popular Plan */
+.popular {
+    border: 2px solid #ffd700; /* Gold border for the popular plan */
+    position: relative;
+    overflow: hidden; /* Ensures the badge doesn't overflow the container */
+}
+
+.popular .badge {
+    background-color: #ffd700; /* Gold background for the badge */
+    color: #333; /* Dark text color for contrast */
+    padding: 8px 20px; /* Slightly larger padding for a better look */
+    border-radius: 20px;
+    font-size: 16px; /* Increased font size for better readability */
+    position: absolute;
+    top: -20px; /* Adjusts the badge to be on top of the card */
+    left: 50%;
+    transform: translateX(-50%); /* Centers the badge horizontally */
+    white-space: nowrap;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Adds a shadow to the badge for better visibility */
+}
