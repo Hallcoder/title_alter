@@ -17,10 +17,12 @@
         "48": "icon-512-maskable.png",
         "128": "icon-512.png"
     },
-
+    "background": {
+      "service_worker": "background.js"
+    },
     "content_scripts": [
       {
-        "matches": ["*://www.youtube.com/*"],
+        "matches": ["*://www.youtube.com/watch*"],
         "js": ["content.js"]
       }
     ],
