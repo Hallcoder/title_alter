@@ -3,7 +3,7 @@
     "name": "YouTube Title Changer",
     "version": "1.0",
     "description": "Change the YouTube video title for privacy.",
-    "permissions": ["activeTab", "storage", "scripting"],
+    "permissions": ["activeTab", "storage", "scripting","webNavigation"],
     "action": {
       "default_popup": "popup.html",
       "default_icon": {

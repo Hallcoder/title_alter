@@ -56,3 +56,7 @@ function applyTitle(title) {
         titleElement.textContent = title;
     }
 }
+chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+    chrome.tabs.sendMessage(details.tabId, { type: 'URL_CHANGED' });
+});
+
