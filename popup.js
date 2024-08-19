@@ -1,69 +1,81 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Retrieve and set the checkbox state
+    // Retrieve and set the checkbox state for auto-generating titles
     chrome.storage.local.get('autoGenerateOnReload', (result) => {
         document.getElementById('autoSet').checked = result.autoGenerateOnReload || false;
     });
 
-    // Monitor URL changes to detect video change
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const tabId = tabs[0].id;
-
-        chrome.scripting.executeScript({
-            target: { tabId: tabId },
-            function: monitorVideoChange
-        });
+    // Listen for video change events from content.js
+    chrome.runtime.onMessage.addListener(async (message) => {
+        if (message.type === 'VIDEO_CHANGED') {
+            const tabId = await getCurrentTabId();
+            await handleVideoChange(tabId, message.videoId);
+        }
     });
 });
 
-document.getElementById('changeTitle').addEventListener('click', () => {
+document.getElementById('changeTitle').addEventListener('click', async () => {
     const customTitle = document.getElementById('customTitle').value;
     if (customTitle) {
-        chrome.runtime.sendMessage({ type: 'SET_TITLE', title: customTitle });
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                function: changeYouTubeTitle,
-                args: [customTitle]
-            });
-        });
+        const tabId = await getCurrentTabId();
+        await setTitleOnPage(tabId, customTitle);
+        // Store the custom title temporarily to avoid appending issue
+        chrome.storage.local.set({ storedTitle: customTitle });
     }
 });
 
 document.getElementById('autoSet').addEventListener('change', (event) => {
-    chrome.runtime.sendMessage({ type: 'TOGGLE_AUTO_GENERATE', autoGenerateOnReload: event.target.checked });
+    chrome.storage.local.set({ autoGenerateOnReload: event.target.checked });
 });
 
 document.getElementById('generateAIButton').addEventListener('click', async () => {
     const tabId = await getCurrentTabId();
-    generateNewTitle(tabId);
+    await generateNewTitle(tabId);
 });
 
-// Function to change the YouTube title
-function changeYouTubeTitle(newTitle) {
-    const titleElement = document.querySelector('h1.style-scope.ytd-watch-metadata yt-formatted-string');
-    if (titleElement) {
-        titleElement.textContent = newTitle;
-    }
+// Function to handle video change
+async function handleVideoChange(tabId, videoId) {
+    chrome.storage.local.remove('storedTitle');  // Clear the stored title when a new video loads
+
+    chrome.storage.local.get('autoGenerateOnReload', async (result) => {
+        if (result.autoGenerateOnReload) {
+            // Generate a new title using AI if auto-generate is enabled
+            await generateNewTitle(tabId, videoId);
+        } else {
+            // Reset to the video's original title
+            const currentTitle = await getCurrentTitle(tabId);
+            if (currentTitle) {
+                await setTitleOnPage(tabId, currentTitle);
+            }
+        }
+    });
 }
 
-// Function to generate a new title using AI and update the title
-async function generateNewTitle(tabId) {
+// Function to set title on the page
+async function setTitleOnPage(tabId, title) {
+    await chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        func: (newTitle) => {
+            const titleElement = document.querySelector('h1.style-scope.ytd-watch-metadata yt-formatted-string');
+            if (titleElement) {
+                titleElement.textContent = newTitle;
+            }
+        },
+        args: [title]
+    });
+}
+
+// Function to generate a new title using AI
+async function generateNewTitle(tabId, videoId = '') {
     const prompt = 'Generate a catchy YouTube title in French';
-    const loadingSpinner = document.getElementById('loadingSpinner');
     const generateButton = document.getElementById('generateAIButton');
     generateButton.textContent = 'Loading...';
     generateButton.disabled = true;
-    loadingSpinner.style.display = 'block';
 
     try {
-        const newTitle = await generateUsingAI(prompt);
+        const newTitle = await generateUsingAI(prompt, videoId);
         if (newTitle && newTitle.trim()) {
-            chrome.runtime.sendMessage({ type: 'SET_TITLE', title: newTitle.trim() });
-            chrome.scripting.executeScript({
-                target: { tabId: tabId },
-                function: changeYouTubeTitle,
-                args: [newTitle.trim()]
-            });
+            await setTitleOnPage(tabId, newTitle.trim());
+            chrome.storage.local.set({ storedTitle: newTitle.trim() });  // Store the new title
         } else {
             console.error("AI generated an empty title.");
             alert("Failed to generate a valid title. Please try again.");
@@ -73,19 +85,18 @@ async function generateNewTitle(tabId) {
     } finally {
         generateButton.textContent = 'Generate Using AI';
         generateButton.disabled = false;
-        loadingSpinner.style.display = 'none';
     }
 }
 
-// Function to generate a new title using AI
-async function generateUsingAI(prompt) {
+// Function to generate a title using AI
+async function generateUsingAI(prompt, videoId) {
     try {
-        const response = await fetch('http://localhost:3000/openai/generate-title?prompt=' + encodeURIComponent(prompt));
+        const response = await fetch('http://localhost:3000/openai/generate-title?prompt=' + encodeURIComponent(prompt) + '&videoId=' + videoId);
         const newTitle = await response.text();
-        return newTitle.replace(/^"|"$/g, ''); // Clean up the title
+        return newTitle.replace(/^"|"$/g, '');  // Clean up the title
     } catch (error) {
         console.error("Error generating title using AI:", error);
-        return ''; // Return empty string on error
+        return '';  // Return empty string on error
     }
 }
 
@@ -98,25 +109,17 @@ function getCurrentTabId() {
     });
 }
 
-// Function to monitor URL changes (i.e., video changes) and update the title accordingly
-function monitorVideoChange() {
-    let lastUrl = location.href;
-    new MutationObserver(() => {
-        const url = location.href;
-        if (url !== lastUrl) {
-            lastUrl = url;
-
-            // Update the title when the video changes
-            chrome.storage.local.get(['autoGenerateOnReload'], (result) => {
-                if (result.autoGenerateOnReload) {
-                    // If auto-generate is enabled, generate a new title
-                    chrome.runtime.sendMessage({ type: 'GENERATE_TITLE' });
-                } else {
-                    // Otherwise, use the video's existing title
-                    const currentTitle = document.querySelector('h1.style-scope.ytd-watch-metadata yt-formatted-string').textContent;
-                    chrome.runtime.sendMessage({ type: 'SET_TITLE', title: currentTitle });
-                }
-            });
-        }
-    }).observe(document, { subtree: true, childList: true });
+// Helper function to get the current title on the page
+function getCurrentTitle(tabId) {
+    return new Promise((resolve) => {
+        chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            func: () => {
+                const titleElement = document.querySelector('h1.style-scope.ytd-watch-metadata yt-formatted-string');
+                return titleElement ? titleElement.textContent : '';
+            }
+        }, (results) => {
+            resolve(results[0].result || '');
+        });
+    });
 }
