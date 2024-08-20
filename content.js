@@ -1,16 +1,47 @@
-// Content script to monitor URL changes (detecting video changes on YouTube)
-(function() {
-    let lastUrl = location.href;
+let lastVideoId = null;
 
-    new MutationObserver(() => {
-        const url = location.href;
-        if (url !== lastUrl) {
-            lastUrl = url;
-            const videoId = new URL(url).searchParams.get('v');
-            if (videoId) {
-                // Notify popup.js or background.js about the video change
-                chrome.runtime.sendMessage({ type: 'VIDEO_CHANGED', videoId: videoId });
-            }
+function monitorVideoChange() {
+    const observer = new MutationObserver(() => {
+        const currentVideoId = new URLSearchParams(window.location.search).get('v');
+
+        if (currentVideoId !== lastVideoId) {
+            lastVideoId = currentVideoId;
+
+            // Reset title to the original YouTube title
+            resetTitleOnNewVideo();
+
+            // Handle auto-generation if enabled
+            chrome.storage.local.get('autoGenerateOnReload', (result) => {
+                if (result.autoGenerateOnReload) {
+                    chrome.runtime.sendMessage({ type: 'GENERATE_TITLE' });
+                }
+            });
         }
-    }).observe(document, { subtree: true, childList: true });
-})();
+    });
+
+    observer.observe(document, { subtree: true, childList: true });
+}
+
+// Reset title when a new video is detected
+function resetTitleOnNewVideo() {
+    const videoTitleElement = document.querySelector('h1.title, h1.style-scope.ytd-watch-metadata yt-formatted-string');
+    if (videoTitleElement) {
+        const originalTitle = videoTitleElement.getAttribute('data-original-title');
+        if (originalTitle) {
+            videoTitleElement.innerText = originalTitle;
+        }
+        localStorage.removeItem('customTitle'); // Clear stored custom title
+    }
+}
+
+// Store the original title when the page loads
+function storeOriginalTitle() {
+    const videoTitleElement = document.querySelector('h1.title, h1.style-scope.ytd-watch-metadata yt-formatted-string');
+    if (videoTitleElement && !videoTitleElement.getAttribute('data-original-title')) {
+        videoTitleElement.setAttribute('data-original-title', videoTitleElement.innerText);
+    }
+}
+
+// Run this when the page loads
+storeOriginalTitle();
+monitorVideoChange(); // Start monitoring video changes
